@@ -2,7 +2,7 @@ import { useState } from "react";
 // redux
 import { useDispatch, useSelector } from "react-redux";
 // import { nanoid } from "@reduxjs/toolkit"
-import { todoAdded } from "./todosSlice"
+import { addNewTodo } from "./todosSlice"
 import {selectAllUsers} from '../users/usersSlice'
 
 
@@ -13,6 +13,7 @@ const AddTodoForm = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [userId, setUserId] = useState('')
+  const [addRequestStatus, setAddRequestStatus] = useState('idle')
 
   const users = useSelector(selectAllUsers)
 
@@ -22,9 +23,11 @@ const AddTodoForm = () => {
   const onAuthorChanged = e => setUserId(e.target.value)
 
   // if canSave is true ..
-  const canSave = Boolean(title) && Boolean(content) && Boolean(userId)
+  // const canSave = Boolean(title) && Boolean(content) && Boolean(userId)
+  const canSave = [title, content].every(Boolean) && addRequestStatus === 'idle';
 
   // global states
+  /*
   const onSaveTodoClicked = () => {
     if (title && content) {
       dispatch(
@@ -32,6 +35,21 @@ const AddTodoForm = () => {
       )
       setTitle('')
       setContent('')
+    }
+  }
+  */
+  const onSaveTodoClicked = () => {
+    if (canSave) {
+      try {
+        setAddRequestStatus('pending')
+        dispatch(addNewTodo({ title, content })).unwrap()
+        setTitle('')
+        setContent('')
+      } catch (err) {
+        console.error('Failed to save the post', err)
+      } finally {
+        setAddRequestStatus('idle')
+      }
     }
   }
 
